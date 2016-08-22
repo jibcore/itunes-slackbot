@@ -1,5 +1,6 @@
 import itunes
 import time
+import logging
 from slackclient import SlackClient
 from config import SLACK_API_TOKEN, BOT_CHANNEL, MESSAGE_READ_TIMEOUT, BOT_NAME
 
@@ -68,8 +69,12 @@ class SlackBot:
 
     def read_messages_while(self):
         while True:
-            event_data = self.slack_client.rtm_read()
-            if len(event_data) == 1:
-                if event_data[0]['type'] == 'message' and event_data[0]['channel'] == BOT_CHANNEL:
-                    self.parse_message(event_data[0]['text'])
-            time.sleep(MESSAGE_READ_TIMEOUT)
+            try:
+                event_data = self.slack_client.rtm_read()
+                if len(event_data) == 1:
+                    if event_data[0]['type'] == 'message' and event_data[0]['channel'] == BOT_CHANNEL:
+                        self.parse_message(event_data[0]['text'])
+            except Exception as e:
+                logging.error(e)
+            finally:
+                time.sleep(MESSAGE_READ_TIMEOUT)
